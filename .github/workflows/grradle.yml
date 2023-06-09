@@ -26,6 +26,23 @@ jobs:
       - name: Build with Gradle
   
         run: ./gradlew build
+  
+  package:
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Checkout repository
+          uses: actions/checkout@v2
+
+        - name: Set up Java JDK
+          uses: actions/setup-java@v2
+          with:
+           java-version: '17'# Replace with the desired Java version
+           distribution: 'adopt'
+        - name: Grant execute permission to gradlew
+          run: chmod +x ./gradlew
         
-      - name: Package
-        run: ./gradlew assemble
+
+        - name: Package
+          run: ./gradlew assemble
+
