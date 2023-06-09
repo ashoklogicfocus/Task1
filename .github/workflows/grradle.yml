@@ -20,7 +20,7 @@ jobs:
         with:
           java-version: '17'# Replace with the desired Java version
           distribution: 'adopt'
-          permission: chmod -R 777
+          permission: chmod -R 777 gradlew
       - name: Build with Gradle
   
         run: ./gradlew build
