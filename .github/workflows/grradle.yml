@@ -18,7 +18,7 @@ jobs:
       - name: Set up Java JDK
         uses: actions/setup-java@v2
         with:
-          java-version: '11' # Replace with the desired Java version
+          java-version: '17' # Replace with the desired Java version
 
       - name: Build with Gradle
         run: ./gradlew build
