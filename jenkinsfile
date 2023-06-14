@@ -1,0 +1,59 @@
+pipeline {
+    agent any
+     tools {
+         gradle 'Gradle 7.4.2'
+    }
+
+    stages {
+        stage('checkout') {
+            steps {
+                checkout scmGit(branches: [[name: '*/master']], extensions: [], gitTool: 'Default', userRemoteConfigs: [[credentialsId: 'ID', url: 'https://github.com/ashoklogicfocus/Task1.git']])
+            }
+        }
+         stage('Build') {
+            tools {
+              jdk 'java-17'
+            }
+            steps {
+                sh 'chmod -R 755 .'
+                sh './gradlew build'
+            }
+        }
+         stage('Scan') {
+            tools {
+                 jdk 'java-11'
+            }
+            environment {
+                scannerHome= tool 'SonarQube Scanner 4.8.2856'
+                projectName= "springboot"
+            }
+            steps {
+                withSonarQubeEnv('SonarQube Scanner 4.8.2856') {
+                    sh '''${scannerHome}/bin/sonar-scanner -Dsonar.java.binaries=build/classes/java \
+                    -Dsonar.projectKey=$projectName -Dsonar.sources=.'''
+                }
+            }
+         }
+            stage('package') {
+                steps {
+                    sh "echo 'Not implemented'"
+                }
+            }
+            stage("Publish"){
+         
+    environment {
+        NEXUS_VERSION = "nexus 3.47"
+        NEXUS_PROTOCOL = "http"
+        NEXUS_URL = "192.168.1.30:8081"
+        NEXUS_REPOSITORY = "springboot"
+        NEXUS_CREDENTIAL_ID = "nexus"
+    }
+            steps{
+               nexusArtifactUploader artifacts: [[artifactId: 'springboot', classifier: '', file:'/var/lib/jenkins/workspace/spring/build/libs/ci_cd-first-0.0.1-SNAPSHOT.jar', type: 'jar']], credentialsId: 'nexus', groupId: 'com.logicfocus', nexusUrl: '192.168.1.30:8081', nexusVersion: 'nexus3', protocol: 'http', repository: 'springboot', version: '1.0.2' 
+            }
+        }
+               
+}
+}
+
+
