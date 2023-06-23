@@ -7,11 +7,21 @@ on:
     branches:
       - master
   workflow_dispatch:
-       inputs:
-          username:
-             description: "ashok"
-             default: "ashok"
-             type: "string"
+    inputs:
+      name:
+        type: choice
+        description: ashok
+        options: 
+        - dev
+        - pod
+      message:
+        required: true
+      use-emoji:
+        type: boolean
+        description: Include 🎉🤣 emojis
+      environment:
+        type: environment
+
 
 jobs:
   build:
