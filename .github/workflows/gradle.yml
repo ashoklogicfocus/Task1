@@ -10,9 +10,9 @@ jobs:
     steps:
       - name: Create Repository
         id: create_repo
-        uses: actions/github-script@v5
+        uses: ashoklogicfocus/Task1@v5
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PAT }}
           script: |
             const response = await github.repos.createForAuthenticatedUser({
               name: '${{ github.event.inputs.repo_name }}',
@@ -23,9 +23,9 @@ jobs:
 
       - name: Request Approval
         id: request_approval
-        uses: actions/github-script@v5
+        uses: ashoklogicfocus/Task1@v5
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PAT }}
           script: |
             const response = await github.pulls.create({
               owner: context.repo.owner,
@@ -46,7 +46,7 @@ jobs:
         id: wait_approval
         uses: ashoklogicfocus/Task1@v5
         with:
-          github-token: ${{ secrets.NPM_TOKEN }}
+          github-token: ${{ secrets.PAT }}
           script: |
             const { data: reviews } = await github.pulls.listReviews({
               owner: context.repo.owner,
