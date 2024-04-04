@@ -7,12 +7,11 @@ on:
 jobs:
   Approval-Stage:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.event.action == 'opened'
     steps:
       - name: 'Request approval'
         id: approval
         env:
-          PAT: ${{ secrets.PAT }}
+          ashoklogicfocus: ${{ secrets.PAT }}
         run: |
           const github = require('ashoklogicfocus@actions/github');
           const octokit = new github.GitHub(process.env.PAT);
@@ -26,7 +25,6 @@ jobs:
 
   Rejection-Stage:
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request_review' && github.event.review.state == 'changes_requested'
     steps:
       - name: 'Reject pull request'
         run: |
