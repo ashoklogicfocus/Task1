@@ -13,7 +13,7 @@ jobs:
         env:
           ashoklogicfocus: ${{ secrets.PAT }}
         run: |
-          const github = require('ashoklogicfocus@actions/github');
+          const github = require('ashoklogicfocus');
           const octokit = new github.GitHub(process.env.PAT);
           const result = await octokit.pulls.requestReviewers({
             owner: github.context.repo.owner,
