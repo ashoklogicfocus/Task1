@@ -5,28 +5,62 @@ on:
       - master
 
 jobs:
-  Approval-Stage:
+  create_repo:
     runs-on: ubuntu-latest
     steps:
-      - name: 'Request approval'
-        id: approval
-        env:
-          ashoklogicfocus: ${{ secrets.PAT }}
-        run: |
-          const github = require('ashoklogicfocus/Task1@v1');
-          const octokit = new github.GitHub(process.env.PAT);
-          const result = await octokit.pulls.requestReviewers({
-            owner: github.context.repo.owner,
-            repo: github.context.repo.repo,
-            pull_number: github.context.payload.pull_request.number,
-            reviewers: ['ashoklogicfocus']
-          });
-          console.log(result);
+      - name: Create Repository
+        id: create_repo
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const response = await github.repos.createForAuthenticatedUser({
+              name: '${{ github.event.inputs.repo_name }}',
+              private: false,
+            });
+            console.log(response.data.full_name);
+            return response.data.full_name;
 
-  Rejection-Stage:
+      - name: Request Approval
+        id: request_approval
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const response = await github.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Repository Creation Approval',
+              head: '${{ github.event.inputs.repo_name }}',
+              base: 'main',
+              body: 'Please review and approve the creation of this repository.',
+            });
+            console.log(response.data.number);
+            return response.data.number;
+
+  approve_or_reject:
+    needs: create_repo
     runs-on: ubuntu-latest
     steps:
-      - name: 'Reject pull request'
-        run: |
-          Write-Host 'Rejecting pull request'
-          # Add any rejection steps you need here
+      - name: Wait for Approval
+        id: wait_approval
+        uses: ashoklogicfocus/Task1@v5
+        with:
+          github-token: ${{ secrets.NPM_TOKEN }}
+          script: |
+            const { data: reviews } = await github.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: ${{ needs.create_repo.outputs.request_approval }},
+            });
+            const approved = reviews.some(review => review.state === 'APPROVED');
+            console.log(approved);
+            return approved;
+
+      - name: Accept or Reject
+        if: steps.wait_approval.outputs.result == 'true'
+        run: echo "Repository Accepted"
+        
+      - name: Accept or Reject
+        if: steps.wait_approval.outputs.result == 'false'
+        run: echo "Repository Rejected"
